@@ -1,9 +1,13 @@
 import pytesseract
 from PIL import ImageGrab
-import tkinter as tk
+import customtkinter as ctk
 
 # Set the path to the Tesseract executable
 pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files/Tesseract-OCR/tesseract.exe'
+
+# Set the appearance mode and color theme
+ctk.set_appearance_mode("System")  # Modes: system (default), light, dark
+ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 
 # Create a function to perform OCR on the screenshot
 def perform_ocr(bbox):
@@ -22,11 +26,11 @@ def perform_ocr(bbox):
 # Create a function to select the area of the screen to capture
 def select_area():
     # Create a new fullscreen and transparent window
-    selection_window = tk.Toplevel(window)
+    selection_window = ctk.CTkToplevel(window)
     selection_window.attributes('-fullscreen', True, '-alpha', 0.3)
 
     # Create a canvas to draw the selection rectangle
-    canvas = tk.Canvas(selection_window)
+    canvas = ctk.CTkCanvas(selection_window)
     canvas.pack(fill='both', expand=True)
 
     # Initialize the starting coordinates
@@ -68,15 +72,15 @@ def select_area():
     canvas.bind('<ButtonRelease-1>', end_selection)
 
 # Create the GUI window
-window = tk.Tk()
+window = ctk.CTk()
 window.title("OCRder")
 
 # Create a button to trigger OCR
-ocr_button = tk.Button(window, text="Perform OCR", command=select_area)
+ocr_button = ctk.CTkButton(window, text="Perform OCR", command=select_area)
 ocr_button.pack()
 
 # Create a label to display the extracted text
-text_label = tk.Label(window, text="")
+text_label = ctk.CTkLabel(window, text="")
 text_label.pack()
 
 # Start the GUI event loop
