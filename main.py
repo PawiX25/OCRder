@@ -6,9 +6,9 @@ import tkinter as tk
 pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files/Tesseract-OCR/tesseract.exe'
 
 # Create a function to perform OCR on the screenshot
-def perform_ocr():
+def perform_ocr(bbox):
     # Capture the screen
-    screenshot = ImageGrab.grab()
+    screenshot = ImageGrab.grab(bbox)
 
     # Convert the screenshot to grayscale
     screenshot = screenshot.convert('L')
@@ -19,12 +19,52 @@ def perform_ocr():
     # Update the text in the GUI
     text_label.config(text=text)
 
+# Create a function to select the area of the screen to capture
+def select_area():
+    # Create a new fullscreen and transparent window
+    selection_window = tk.Toplevel(window)
+    selection_window.attributes('-fullscreen', True, '-alpha', 0.3)
+
+    # Create a canvas to draw the selection rectangle
+    canvas = tk.Canvas(selection_window)
+    canvas.pack(fill='both', expand=True)
+
+    # Initialize the starting coordinates
+    start_x, start_y = None, None
+
+    # Function to update the selection rectangle
+    def update_rectangle(event):
+        nonlocal start_x, start_y
+        # Set the starting coordinates when the mouse is first clicked
+        if start_x is None and start_y is None:
+            start_x, start_y = event.x, event.y
+        # Update the rectangle
+        canvas.coords(rectangle, start_x, start_y, event.x, event.y)
+
+    # Function to end the selection
+    def end_selection(event):
+        # Get the bounding box coordinates
+        bbox = (start_x, start_y, event.x, event.y)
+
+        # Perform OCR on the selected area
+        perform_ocr(bbox)
+
+        # Close the selection window
+        selection_window.destroy()
+
+    # Create an invisible rectangle
+    rectangle = canvas.create_rectangle(0, 0, 0, 0)
+
+    # Bind the mouse events
+    canvas.bind('<B1-Motion>', update_rectangle)
+    canvas.bind('<ButtonRelease-1>', end_selection)
+
 # Create the GUI window
 window = tk.Tk()
 window.title("OCRder")
 
 # Create a button to trigger OCR
-ocr_button = tk.Button(window, text="Perform OCR", command=perform_ocr)
+ocr_button = tk.Button(window, text="Perform OCR", command=select_area)
 ocr_button.pack()
 
 # Create a label to display the extracted text
