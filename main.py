@@ -44,7 +44,15 @@ def select_area():
     # Function to end the selection
     def end_selection(event):
         # Get the bounding box coordinates
-        bbox = (start_x, start_y, event.x, event.y)
+        left, upper, right, lower = start_x, start_y, event.x, event.y
+
+        # Ensure 'right' is greater than 'left' and 'lower' is greater than 'upper'
+        if right < left:
+            left, right = right, left
+        if lower < upper:
+            upper, lower = lower, upper
+
+        bbox = (left, upper, right, lower)
 
         # Perform OCR on the selected area
         perform_ocr(bbox)
