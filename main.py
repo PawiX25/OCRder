@@ -2,6 +2,7 @@ import pytesseract
 from PIL import ImageGrab
 import customtkinter as ctk
 from customtkinter import filedialog
+import keyboard
 
 # Set the path to the Tesseract executable
 pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files/Tesseract-OCR/tesseract.exe'
@@ -111,6 +112,9 @@ save_button.pack_forget()  # Hide the button initially
 # Create a label to display the extracted text
 text_label = ctk.CTkLabel(window, text="")
 text_label.pack()
+
+# Bind the hotkey to the select_area function
+keyboard.add_hotkey('windows+shift+x', select_area)
 
 # Start the GUI event loop
 window.mainloop()
