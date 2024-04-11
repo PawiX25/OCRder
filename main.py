@@ -1,6 +1,7 @@
 import pytesseract
 from PIL import ImageGrab
 import customtkinter as ctk
+from customtkinter import filedialog
 
 # Set the path to the Tesseract executable
 pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files/Tesseract-OCR/tesseract.exe'
@@ -23,6 +24,9 @@ def perform_ocr(bbox):
 
         # Update the text in the GUI
         text_label.configure(text=text)
+
+        # Show the "Save" button
+        save_button.pack()
     except Exception as e:
         # Handle the OCR error
         text_label.configure(text="OCR Error: " + str(e))
@@ -81,7 +85,15 @@ def select_area():
         canvas.bind('<ButtonRelease-1>', end_selection)
     except Exception as e:
         # Handle the selection window creation error
-        text_label.configureure(text="Selection Window Error: " + str(e))
+        text_label.configure(text="Selection Window Error: " + str(e))
+
+def save_to_file():
+    # Ask the user where to save the file
+    filename = filedialog.asksaveasfilename(defaultextension=".txt")
+    if filename:
+        # Open the file in write mode and write the contents of text_label to it
+        with open(filename, 'w') as file:
+            file.write(text_label.cget("text"))
 
 # Create the GUI window
 window = ctk.CTk()
@@ -90,6 +102,11 @@ window.title("OCRder")
 # Create a button to trigger OCR
 ocr_button = ctk.CTkButton(window, text="Perform OCR", command=select_area)
 ocr_button.pack()
+
+# Create a button to save the OCR results
+save_button = ctk.CTkButton(window, text="Save", command=save_to_file)
+save_button.pack()
+save_button.pack_forget()  # Hide the button initially
 
 # Create a label to display the extracted text
 text_label = ctk.CTkLabel(window, text="")
