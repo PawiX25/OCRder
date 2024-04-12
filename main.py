@@ -3,6 +3,9 @@ from PIL import ImageGrab
 import customtkinter as ctk
 from customtkinter import filedialog
 import keyboard
+import time
+import os
+import sys
 
 # If running the bundled app, find the Tesseract OCR engine in the current directory
 if getattr(sys, 'frozen', False):
@@ -10,12 +13,14 @@ if getattr(sys, 'frozen', False):
 # If running the script directly, find the Tesseract OCR engine in the specified directory
 else:
     pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
+
 # Set the appearance mode and color theme
 ctk.set_appearance_mode("System")  # Modes: system (default), light, dark
 ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 
 # Create a function to perform OCR on the screenshot
 def perform_ocr(bbox):
+    start_time = time.time()  # Record the start time
     try:
         # Capture the screen
         screenshot = ImageGrab.grab(bbox)
@@ -34,6 +39,10 @@ def perform_ocr(bbox):
     except Exception as e:
         # Handle the OCR error
         text_label.configure(text="OCR Error: " + str(e))
+    finally:
+        end_time = time.time()  # Record the end time
+        processing_time = end_time - start_time  # Calculate the processing time
+        window.title(f"OCRder - Processing Time: {processing_time:.2f} seconds")  # Update the window title
 
 # Create a function to select the area of the screen to capture
 def select_area():
