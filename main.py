@@ -4,9 +4,12 @@ import customtkinter as ctk
 from customtkinter import filedialog
 import keyboard
 
-# Set the path to the Tesseract executable
-pytesseract.pytesseract.tesseract_cmd = r'C:/Program Files/Tesseract-OCR/tesseract.exe'
-
+# If running the bundled app, find the Tesseract OCR engine in the current directory
+if getattr(sys, 'frozen', False):
+    pytesseract.pytesseract.tesseract_cmd = os.path.join(sys._MEIPASS, 'Tesseract-OCR', 'tesseract.exe')
+# If running the script directly, find the Tesseract OCR engine in the specified directory
+else:
+    pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
 # Set the appearance mode and color theme
 ctk.set_appearance_mode("System")  # Modes: system (default), light, dark
 ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
