@@ -15,6 +15,8 @@ jobs:
 
     env:
       MAIN_PY_FILE: 'main.py'
+      ICON_URL: 'https://github.com/PawiX25/OCRder/assets/81538700/c9ab9e2b-fd23-471d-81a9-411d67912ab6'
+      ICON_FILE: 'icon.ico'
 
     steps:
     - name: Checkout code
@@ -35,9 +37,14 @@ jobs:
         pip install pyinstaller
       working-directory: ./
 
+    - name: Download Icon
+      uses: wei/wget@v1
+      with:
+        args: -O ${{ env.ICON_FILE }} ${{ env.ICON_URL }}
+
     - name: Build executable
       run: |
-        pyinstaller ${{ env.MAIN_PY_FILE }}
+        pyinstaller --noconfirm --windowed --icon "${{ env.ICON_FILE }}" --name "OCRder" --clean --optimize 2 ${{ env.MAIN_PY_FILE }}
       working-directory: ./
 
     - name: Create Artifact (Windows)
