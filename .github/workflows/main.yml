@@ -38,9 +38,13 @@ jobs:
       working-directory: ./
 
     - name: Download Icon
-      uses: wei/wget@v1
-      with:
-        args: -O ${{ env.ICON_FILE }} ${{ env.ICON_URL }}
+      shell: bash
+      run: |
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          powershell.exe -Command "Invoke-WebRequest -Uri ${{ env.ICON_URL }} -OutFile ${{ env.ICON_FILE }}"
+        else
+          curl -L -o ${{ env.ICON_FILE }} ${{ env.ICON_URL }}
+        fi
 
     - name: Build executable
       run: |
