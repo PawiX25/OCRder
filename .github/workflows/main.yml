@@ -49,6 +49,8 @@ jobs:
     - name: Install Chocolatey
       if: matrix.os == 'windows-latest'
       uses: crazy-max/ghaction-chocolatey@v3
+      with:
+        args: install tesseract
 
     - name: Install Tesseract OCR
       run: |
@@ -58,8 +60,6 @@ jobs:
           sudo apt-get install -y tesseract-ocr-all
         elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
           brew install tesseract
-        elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-          choco install tesseract
         fi
 
     - name: Add Tesseract to PATH
