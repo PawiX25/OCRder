@@ -46,9 +46,34 @@ jobs:
           curl -L -o ${{ env.ICON_FILE }} ${{ env.ICON_URL }}
         fi
 
+    - name: Install Chocolatey
+      if: matrix.os == 'windows-latest'
+      uses: crazy-max/ghaction-chocolatey@v3
+
+    - name: Install Tesseract OCR
+      run: |
+        if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+          sudo apt-get update
+          sudo apt-get install -y libtesseract-dev libleptonica-dev
+          sudo apt-get install -y tesseract-ocr-all
+        elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+          brew install tesseract
+        elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          choco install tesseract
+        fi
+
+    - name: Add Tesseract to PATH
+      run: echo "Tesseract-OCR/bin" >> $GITHUB_PATH
+
     - name: Build executable
       run: |
-        pyinstaller --noconfirm --windowed --icon "${{ env.ICON_FILE }}" --name "OCRder" --clean --optimize 2 ${{ env.MAIN_PY_FILE }}
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          pyinstaller --noconfirm --windowed --icon "${{ env.ICON_FILE }}" --name "OCRder" --clean --optimize 2 --add-data "C:/Program Files/Tesseract-OCR;Tesseract-OCR/" ${{ env.MAIN_PY_FILE }}
+        elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+          pyinstaller --noconfirm --windowed --icon "${{ env.ICON_FILE }}" --name "OCRder" --clean --optimize 2 --add-data "/usr/share/tesseract-ocr/5.3.4/tessdata:./tessdata" ${{ env.MAIN_PY_FILE }}
+        elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+          pyinstaller --noconfirm --windowed --icon "${{ env.ICON_FILE }}" --name "OCRder" --clean --optimize 2 --add-data "/usr/local/share/tessdata:./tessdata" ${{ env.MAIN_PY_FILE }}
+        fi
       working-directory: ./
 
     - name: Create Artifact (Windows)
