@@ -6,6 +6,11 @@ import keyboard
 import time
 import os
 import sys
+import logging
+import pyperclip
+
+# Initialize logging
+logging.basicConfig(filename='ocrder.log', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # If running the bundled app, find the Tesseract OCR engine in the current directory
 if getattr(sys, 'frozen', False):
@@ -34,10 +39,14 @@ def perform_ocr(bbox):
         # Update the text in the GUI
         text_label.configure(text=text)
 
+        # Copy text to clipboard
+        pyperclip.copy(text)
+
         # Show the "Save" button
         save_button.pack()
     except Exception as e:
         # Handle the OCR error
+        logging.error("OCR Error: " + str(e))
         text_label.configure(text="OCR Error: " + str(e))
     finally:
         end_time = time.time()  # Record the end time
@@ -88,6 +97,7 @@ def select_area():
                 selection_window.destroy()
             except Exception as e:
                 # Handle the selection error
+                logging.error("Selection Error: " + str(e))
                 text_label.configure(text="Selection Error: " + str(e))
 
         # Create an invisible rectangle
@@ -98,15 +108,21 @@ def select_area():
         canvas.bind('<ButtonRelease-1>', end_selection)
     except Exception as e:
         # Handle the selection window creation error
+        logging.error("Selection Window Error: " + str(e))
         text_label.configure(text="Selection Window Error: " + str(e))
 
 def save_to_file():
     # Ask the user where to save the file
     filename = filedialog.asksaveasfilename(defaultextension=".txt")
     if filename:
-        # Open the file in write mode and write the contents of text_label to it
-        with open(filename, 'w') as file:
-            file.write(text_label.cget("text"))
+        try:
+            # Open the file in write mode and write the contents of text_label to it
+            with open(filename, 'w') as file:
+                file.write(text_label.cget("text"))
+        except Exception as e:
+            # Handle file saving error
+            logging.error("File Saving Error: " + str(e))
+            text_label.configure(text="File Saving Error: " + str(e))
 
 # Create the GUI window
 window = ctk.CTk()
