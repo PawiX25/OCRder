@@ -38,12 +38,13 @@ jobs:
       working-directory: ./
 
     - name: Download Icon
+      shell: pwsh
       run: |
-        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-          powershell.exe -Command "Invoke-WebRequest -Uri ${{ env.ICON_URL }} -OutFile ${{ env.ICON_FILE }}"
-        else
-          curl -L -o ${{ env.ICON_FILE }} ${{ env.ICON_URL }}
-        fi
+        if ($env:RUNNER_OS -eq "Windows") {
+          Invoke-WebRequest -Uri $env:ICON_URL -OutFile $env:ICON_FILE
+        } else {
+          curl -L -o $env:ICON_FILE $env:ICON_URL
+        }
 
     - name: Install Chocolatey
       if: matrix.os == 'windows-latest'
@@ -53,32 +54,35 @@ jobs:
 
     - name: Install Tesseract OCR
       run: |
-        if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+        if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
           sudo apt-get update
           sudo apt-get install -y libtesseract-dev libleptonica-dev
           sudo apt-get install -y tesseract-ocr-all
-        elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+        elif [ "${{ matrix.os }}" == "macos-latest" ]; then
           brew update
           brew install tesseract
         fi
+      shell: bash
 
     - name: Verify Tesseract Installation
       run: |
-        if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+        if [ "${{ matrix.os }}" == "macos-latest" ]; then
           brew list tesseract
-          ls -l /usr/local/share/tessdata
+          ls -l $(brew --prefix tesseract)/share/tessdata
         fi
+      shell: bash
 
     - name: Build executable
       run: |
-        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
           pyinstaller --noconfirm --windowed --icon "${{ env.ICON_FILE }}" --name "OCRder" --clean --optimize 2 --add-data "C:/Program Files/Tesseract-OCR;Tesseract-OCR/" ${{ env.MAIN_PY_FILE }}
-        elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+        elif [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
           pyinstaller --noconfirm --windowed --icon "${{ env.ICON_FILE }}" --name "OCRder" --clean --optimize 2 --add-data "/usr/share/tesseract-ocr/4.00/tessdata:./tessdata" ${{ env.MAIN_PY_FILE }}
-        elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+        elif [ "${{ matrix.os }}" == "macos-latest" ]; then
           TESSDATA_DIR=$(brew --prefix tesseract)/share/tessdata
           pyinstaller --noconfirm --windowed --icon "${{ env.ICON_FILE }}" --name "OCRder" --clean --optimize 2 --add-data "$TESSDATA_DIR:./tessdata" ${{ env.MAIN_PY_FILE }}
         fi
+      shell: bash
       working-directory: ./
 
     - name: Create Artifact (Windows)
